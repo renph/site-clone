@@ -9,24 +9,6 @@ from pathlib import Path
 import requests
 from bs4 import BeautifulSoup
 
-Welcome = """
- .▄▄ · ▪  ▄▄▄▄▄▄▄▄ . ▄▄·        ▄▄▄· ▄· ▄▌
- ▐█ ▀. ██ •██  ▀▄.▀·▐█ ▌▪▪     ▐█ ▄█▐█▪██▌
- ▄▀▀▀█▄▐█· ▐█.▪▐▀▀▪▄██ ▄▄ ▄█▀▄  ██▀·▐█▌▐█▪
- ▐█▄▪▐█▐█▌ ▐█▌·▐█▄▄▌▐███▌▐█▌.▐▌▐█▪·• ▐█▀·.
-  ▀▀▀▀ ▀▀▀ ▀▀▀  ▀▀▀ ·▀▀▀  ▀█▄▀▪.▀     ▀ • """
-
-Information = r"""
- Author: 	Threezh1
- Blog:		http://www.threezh1.com/
- Version:	1.0"""
-
-Help = r"""
- Uage: README.md
- Stop Copy: Ctrl + C
-"""
-
-
 
 def parse_args():
     parser = argparse.ArgumentParser(epilog='\tExample: \r\npython ' + sys.argv[0] + " -u http://www.baidu.com")
@@ -441,6 +423,22 @@ def ExtractUrls(main_url, depth=200, threads=30):
 
 
 if __name__ == "__main__":
+    Welcome = """
+     .▄▄ · ▪  ▄▄▄▄▄▄▄▄ . ▄▄·        ▄▄▄· ▄· ▄▌
+     ▐█ ▀. ██ •██  ▀▄.▀·▐█ ▌▪▪     ▐█ ▄█▐█▪██▌
+     ▄▀▀▀█▄▐█· ▐█.▪▐▀▀▪▄██ ▄▄ ▄█▀▄  ██▀·▐█▌▐█▪
+     ▐█▄▪▐█▐█▌ ▐█▌·▐█▄▄▌▐███▌▐█▌.▐▌▐█▪·• ▐█▀·.
+      ▀▀▀▀ ▀▀▀ ▀▀▀  ▀▀▀ ·▀▀▀  ▀█▄▀▪.▀     ▀ • """
+
+    Information = r"""
+     Author: 	Threezh1
+     Blog:		http://www.threezh1.com/
+     Version:	1.0"""
+
+    Help = r"""
+     Uage: README.md
+     Stop Copy: Ctrl + C
+    """
 
     print(Welcome)
     print(Information)

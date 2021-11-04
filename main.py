@@ -26,8 +26,6 @@ Help = r"""
  Stop Copy: Ctrl + C
 """
 
-header = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.108 Safari/537.36", }
 
 
 def parse_args():
@@ -42,6 +40,10 @@ def parse_args():
 
 # Get the page source
 def ExtractContent(url):
+    header = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
+                      "Chrome/74.0.3729.108 Safari/537.36", }
+
     try:
         raw = requests.get(url, headers=header, timeout=10, allow_redirects=True, verify=False)
         raw = raw.content

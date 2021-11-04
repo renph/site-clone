@@ -1,5 +1,12 @@
-import requests, urllib, os, asyncio, functools, argparse, sys
+import argparse
+import asyncio
+import functools
+import os
+import sys
+import urllib
 from pathlib import Path
+
+import requests
 from bs4 import BeautifulSoup
 
 Welcome = """
@@ -18,7 +25,6 @@ Help = r"""
  Uage: README.md
  Stop Copy: Ctrl + C
 """
-
 
 header = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.108 Safari/537.36", }
@@ -67,7 +73,7 @@ def GetUrlPart(url, part=""):
     # filename : index.php
     # filesuffix : php
 
-    if url.startswith("http") == False:
+    if not url.startswith("http"):
         if part == "path":
             return url[:url.rfind("/") + 1]
         if part == "filename":
@@ -121,7 +127,7 @@ def ProcessResourcePath(pages_url, source_url):
         relative_path += "../"
     # process others
     if_others = False
-    if source_url.startswith("data:image") == False:
+    if not source_url.startswith("data:image"):
         # process absolute and special path
         if_abslote_url = False
         if source_url.startswith("http"):
@@ -148,11 +154,13 @@ def ProcessResourcePath(pages_url, source_url):
             for i in range(source_url.count("../") + 1):
                 temp = temp[:temp.rfind("/") + 1]
             processed_source_url = source_url
-            if absolte_url_path.startswith("/"): absolte_url_path = absolte_url_path[1:]
+            if absolte_url_path.startswith("/"):
+                absolte_url_path = absolte_url_path[1:]
             source_save_path = absolte_url_path + cleared_source_path + cleared_source_url
             if_special_url = True
-        elif source_url.startswith("/") and source_url.startswith("//") == False and source_url.startswith(
-                "/./") == False:
+        elif (source_url.startswith("/")
+              and not source_url.startswith("//")
+              and not source_url.startswith("/./")):
             source_url_kind = 4
             source_download_url = GetUrlPart(pages_url, "completedomain") + source_url
             if relative_path == "":
@@ -171,11 +179,11 @@ def ProcessResourcePath(pages_url, source_url):
             if_special_url = True
 
         # process relative path
-        if if_abslote_url == True:
+        if if_abslote_url:
             temp_source_name = Md5Encrypt(source_url) + GetUrlPart(source_download_url, "filesuffix")
             processed_source_url = relative_path + "nopathsource/" + temp_source_name
             source_save_path = "nopathsource/" + temp_source_name
-        elif if_special_url == True:
+        elif if_special_url:
             pass
         elif source_url.startswith("./"):
             source_url_kind = 6
@@ -184,9 +192,9 @@ def ProcessResourcePath(pages_url, source_url):
             source_url_kind = 7
             cleared_source_url = GetUrlPart(source_url, "path") + GetUrlPart(source_url, "filename")
 
-        if if_abslote_url == False and if_special_url == False:
-            source_download_url = GetUrlPart(pages_url, "completedomain") + GetUrlPart(pages_url,
-                                                                                       "completepath") + cleared_source_url
+        if not if_abslote_url and not if_special_url:
+            source_download_url = GetUrlPart(pages_url, "completedomain") + \
+                                  GetUrlPart(pages_url, "completepath") + cleared_source_url
             processed_source_url = cleared_source_url
             source_save_path = url_path[1:] + cleared_source_url
     else:
@@ -223,7 +231,8 @@ def ExtractLinks(url, lable_name, attribute_name):
     single_black_names = ["/", "#"]
     starts_black_names = ["#", "javascript:"]
     html_raw = ExtractContent(url)
-    if html_raw == None: return []
+    if html_raw is None:
+        return []
     html = BeautifulSoup(html_raw.decode("utf-8", "ignore"), "html.parser")
     lables = html.findAll({lable_name})
     old_links = []
@@ -243,7 +252,7 @@ def SaveFile(file_content, file_path, utf8=False):
     try:
         path = Path(GetUrlPart(processed_path, "path"))
         path.mkdir(parents=True, exist_ok=True)
-        if utf8 == False:
+        if not utf8:
             with open(processed_path, "wb") as fobject:
                 fobject.write(file_content)
         else:
@@ -257,8 +266,9 @@ def SaveFile(file_content, file_path, utf8=False):
 def ProcessLink(page_url, link, if_page_url=False):
     temp = ProcessResourcePath(page_url, link)
     processed_link = temp["source_download_url"]
-    if GetUrlPart(page_url, "domain") != GetUrlPart(processed_link, "domain"): return None
-    if if_page_url == True:
+    if GetUrlPart(page_url, "domain") != GetUrlPart(processed_link, "domain"):
+        return None
+    if if_page_url:
         processed_link = GetUrlPart(processed_link, "completedomain") + GetUrlPart(processed_link, "path")
     else:
         temp = ProcessResourcePath(page_url, link)
@@ -271,7 +281,7 @@ def ProcessLink(page_url, link, if_page_url=False):
         processed_link += "index.html"
     else:
         processed_link += ".html"
-    if if_page_url == False:
+    if not if_page_url:
         if processed_link.startswith("/"):
             processed_link = processed_link[1:]
     return processed_link
@@ -282,7 +292,7 @@ def SaveSinglePage(page_url):
     domain_path = domain.replace(".", "_")
     processed_page_url = ProcessLink("http://" + domain, page_url, True)
     page_save_path = "website/" + domain_path + "/" + GetUrlPart(processed_page_url, "path")
-    if os.path.exists(page_save_path) == True:
+    if os.path.exists(page_save_path):
         print("[Info] - " + page_url + " Downloaded")
         return None
     print("[Processing] - " + page_url)
@@ -292,7 +302,8 @@ def SaveSinglePage(page_url):
     links_a = ExtractLinks(page_url, "a", "href")
     links_all = links_js + links_css + links_img
     page_raw = ExtractContent(page_url)
-    if page_raw == None: return None
+    if page_raw is None:
+        return None
     page_raw = page_raw.decode("utf-8", "ignore")
     processed_links = []
     for link in links_all:
@@ -304,17 +315,21 @@ def SaveSinglePage(page_url):
             continue
         source_save_path = "website/" + domain_path + "/" + link_info["source_save_path"]
         source_save_path.replace("\\\\", "")
-        if os.path.exists(source_save_path) == True: continue
+        if os.path.exists(source_save_path):
+            continue
         source_raw = ExtractContent(link_info["source_download_url"])
         # print(source_save_path)
-        if source_raw == None: continue
+        if source_raw is None:
+            continue
         SaveFile(source_raw, source_save_path)
     links = []
     links_copy = []
     for link_a in links_a:
         processed_link = ProcessLink(page_url, link_a)
-        if processed_link in links_copy: continue
-        if processed_link == None: continue
+        if processed_link in links_copy:
+            continue
+        if processed_link is None:
+            continue
         links_copy.append(processed_link)
         link_temp = {
             "link": link_a,
@@ -323,7 +338,8 @@ def SaveSinglePage(page_url):
         links.append(link_temp)
 
     for link in links:
-        if link["link"] == '/': continue
+        if link["link"] == '/':
+            continue
         page_raw = page_raw.replace(link["link"], link["processed_link"])
     SaveFile(page_raw, page_save_path, True)
 
@@ -337,9 +353,12 @@ def CollectUrls(page_url):
     for link in links_a:
         link_info = ProcessResourcePath(page_url, link)
         processed_link = link_info["source_download_url"]
-        if GetUrlPart(processed_link, "domain") != GetUrlPart(page_url, "domain"): continue
-        if IfBlackName(filename_black_names, GetUrlPart(processed_link, "path"), 2): continue
-        if IfBlackName(black_suffix, GetUrlPart(processed_link, "filesuffix")): continue
+        if GetUrlPart(processed_link, "domain") != GetUrlPart(page_url, "domain"):
+            continue
+        if IfBlackName(filename_black_names, GetUrlPart(processed_link, "path"), 2):
+            continue
+        if IfBlackName(black_suffix, GetUrlPart(processed_link, "filesuffix")):
+            continue
         processed_link = GetUrlPart(processed_link, "completedomain") + GetUrlPart(processed_link, "path")
         if processed_link not in result:
             result.append(processed_link)
@@ -367,15 +386,15 @@ def coroutine_init(function, parameters, threads):
     result = []
     for num in range(times):
         tasks = []
-        Minimum = threads * num
-        Maximum = threads * (num + 1)
+        minimum = threads * num
+        maximum = threads * (num + 1)
         if num == times - 1 and len(parameters) % threads != 0:
-            Minimum = (times - 1) * threads
-            Maximum = len(parameters)
+            minimum = (times - 1) * threads
+            maximum = len(parameters)
         if len(parameters) <= threads:
-            Minimum = 0
-            Maximum = len(parameters)
-        for i in range(Minimum, Maximum):
+            minimum = 0
+            maximum = len(parameters)
+        for i in range(minimum, maximum):
             # 此处的parameters[i]就是取目标参数的单个值，可自行调整
             future = asyncio.ensure_future(coroutine_execution(function, param1=parameters[i]))
             tasks.append(future)
@@ -399,7 +418,8 @@ def ExtractUrls(main_url, depth=200, threads=30):
     for i in range(0, depth):
         print("- " + str(i + 1) + "th loop traversal in progress")
         copy_urls = urls[:]
-        if len(copy_urls) == len(collected_urls): break
+        if len(copy_urls) == len(collected_urls):
+            break
         not_extracted_urls = []
         for url in copy_urls:
             if url not in collected_urls:
@@ -425,28 +445,32 @@ if __name__ == "__main__":
     print(Help)
 
     args = parse_args()
-    if args.urls == None:
-        if args.url == None:
+    if args.urls is None:
+        if args.url is None:
             print("Please enter a url. \n Example: python -u 'http://www.threezh1.com/'")
             exit()
-        if args.entire == True:
+        if args.entire:
             depth = 200
             threads = 30
-            if args.depth != None: depth = int(args.depth)
-            if args.threads != None: threads = int(args.threads)
+            if args.depth is not None:
+                depth = int(args.depth)
+            if args.threads is not None:
+                threads = int(args.threads)
             ExtractUrls(args.url, depth, threads)
-        elif args.entire == False:
+        elif not args.entire:
             SaveSinglePage(args.url)
         print("\n[Info] - All resources have been downloaded")
     else:
         with open(args.urls, "r", encoding="utf-8") as fobject:
             urls = fobject.read().split("\n")
         for url in urls:
-            if args.entire == True:
+            if args.entire:
                 depth = 200
                 threads = 30
-                if args.depth != None: depth = int(args.depth)
-                if args.threads != None: threads = int(args.threads)
+                if args.depth is not None:
+                    depth = int(args.depth)
+                if args.threads is not None:
+                    threads = int(args.threads)
                 ExtractUrls(url, depth, threads)
-            elif args.entire == False:
+            elif not args.entire:
                 SaveSinglePage(url)

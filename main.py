@@ -1,8 +1,6 @@
 import requests, urllib, os, asyncio, functools, argparse, sys
 from pathlib import Path
 from bs4 import BeautifulSoup
-from requests.packages import urllib3
-from requests.adapters import HTTPAdapter
 
 Welcome = """
  .▄▄ · ▪  ▄▄▄▄▄▄▄▄ . ▄▄·        ▄▄▄· ▄· ▄▌
@@ -21,7 +19,7 @@ Help = r"""
  Stop Copy: Ctrl + C
 """
 
-urllib3.disable_warnings()
+
 header = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.108 Safari/537.36", }
 
